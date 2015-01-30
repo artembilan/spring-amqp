@@ -113,9 +113,7 @@ public class BlockingQueueConsumerTests {
 
 		when(connectionFactory.createConnection()).thenReturn(connection);
 		when(connection.createChannel(Mockito.anyBoolean())).thenReturn(channel);
-		com.rabbitmq.client.Connection rabbitConnection = mock(com.rabbitmq.client.Connection.class);
-		when(rabbitConnection.isOpen()).thenReturn(true);
-		when(channel.getConnection()).thenReturn(rabbitConnection);
+		when(channel.isOpen()).thenReturn(true);
 		when(channel.queueDeclarePassive(Mockito.anyString()))
 				.then(new Answer<Object>() {
 
@@ -137,6 +135,9 @@ public class BlockingQueueConsumerTests {
 				new DefaultMessagePropertiesConverter(), new ActiveObjectCounter<BlockingQueueConsumer>(),
 				AcknowledgeMode.AUTO, true, 20, "good", "bad");
 
+		blockingQueueConsumer.setDeclarationRetries(1);
+		blockingQueueConsumer.setRetryDeclarationInterval(10);
+		blockingQueueConsumer.setFailedDeclarationRetryInterval(10);
 		blockingQueueConsumer.start();
 
 		verify(channel).basicQos(20);
