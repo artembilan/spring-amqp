@@ -528,6 +528,11 @@ public class AmqpAppender extends AppenderSkeleton {
 						amqpProps.setMessageId(UUID.randomUUID().toString());
 					}
 
+					// Set applicationId, if we're using one
+					if (null != applicationId) {
+						amqpProps.setAppId(applicationId);
+					}
+
 					// Set timestamp
 					Calendar tstamp = Calendar.getInstance();
 					tstamp.setTimeInMillis(logEvent.getTimeStamp());

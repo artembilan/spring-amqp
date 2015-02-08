@@ -509,6 +509,10 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 					}
 					String msgBody;
 					String routingKey = routingKeyLayout.doLayout(logEvent);
+					// Set applicationId, if we're using one
+					if (null != applicationId) {
+						amqpProps.setAppId(applicationId);
+					}
 
 					if (abbreviator != null && logEvent instanceof LoggingEvent) {
 						((LoggingEvent) logEvent).setLoggerName(abbreviator.abbreviate(name));
