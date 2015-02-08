@@ -216,7 +216,7 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 	private TargetLengthBasedClassNameAbbreviator abbreviator;
 
 	public void setRoutingKeyPattern(String routingKeyPattern) {
-		this.routingKeyLayout.setPattern("%nopex" + routingKeyPattern);
+		this.routingKeyLayout.setPattern("%nopex{}" + routingKeyPattern);
 	}
 
 	public String getHost() {
@@ -378,6 +378,8 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 	@Override
 	public void start() {
 		super.start();
+		this.routingKeyLayout.setPattern(this.routingKeyLayout.getPattern()
+				.replaceAll("%property\\{applicationId\\}", this.applicationId));
 		this.routingKeyLayout.setContext(getContext());
 		this.routingKeyLayout.start();
 		this.locationLayout.setContext(getContext());
@@ -391,7 +393,8 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 		maybeDeclareExchange();
 		this.senderPool = Executors.newCachedThreadPool();
 		synchronized(this) {
-		} // (logically) flush all variables to main memory
+			// (logically) flush all variables to main memory
+		}//NOSONAR
 		for (int i = 0; i < this.senderPoolSize; i++) {
 			this.senderPool.submit(new EventSender());
 		}
@@ -461,7 +464,7 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 		public EventSender() {
 			synchronized(AmqpAppender.this) {
 				// (logically) invalidate the CPU cache so we see all outer class fields correctly
-			}
+			}//NOSONAR
 		}
 
 		@Override
@@ -505,14 +508,7 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 								String.format("%s.%s()[%s]", location[0], location[1], location[2]));
 					}
 					String msgBody;
-					String routingKey;
-					// Set applicationId, if we're using one
-					if (null != applicationId) {
-						amqpProps.setAppId(applicationId);
-						logEvent.getLoggerContextVO().getPropertyMap().put(APPLICATION_ID, applicationId);
-					}
-
-					routingKey = routingKeyLayout.doLayout(logEvent);
+					String routingKey = routingKeyLayout.doLayout(logEvent);
 
 					if (abbreviator != null && logEvent instanceof LoggingEvent) {
 						((LoggingEvent) logEvent).setLoggerName(abbreviator.abbreviate(name));

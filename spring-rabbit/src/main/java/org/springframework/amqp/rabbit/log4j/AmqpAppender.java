@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
-import org.apache.log4j.MDC;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.ErrorCode;
 import org.apache.log4j.spi.LocationInfo;
@@ -144,7 +143,7 @@ public class AmqpAppender extends AppenderSkeleton {
 	/**
 	 * Log4J Layout to use to generate routing key.
 	 */
-	private Layout routingKeyLayout = new PatternLayout(routingKeyPattern);
+	private Layout routingKeyLayout;
 
 	/**
 	 * Used to synchronize access to pattern layouts.
@@ -313,7 +312,6 @@ public class AmqpAppender extends AppenderSkeleton {
 
 	public void setRoutingKeyPattern(String routingKeyPattern) {
 		this.routingKeyPattern = routingKeyPattern;
-		this.routingKeyLayout = new PatternLayout(routingKeyPattern);
 	}
 
 	public boolean isDeclareExchange() {
@@ -410,7 +408,8 @@ public class AmqpAppender extends AppenderSkeleton {
 	protected void startSenders() {
 		senderPool = Executors.newCachedThreadPool();
 		synchronized(this) {
-		} // (logically) flush all variables to main memory
+			// (logically) flush all variables to main memory
+		}//NOSONAR
 		for (int i = 0; i < senderPoolSize; i++) {
 			senderPool.submit(new EventSender());
 		}
@@ -447,6 +446,8 @@ public class AmqpAppender extends AppenderSkeleton {
 	public void append(LoggingEvent event) {
 		if (null == senderPool && this.initializing.compareAndSet(false, true)) {
 			try {
+				this.routingKeyLayout = new PatternLayout(this.routingKeyPattern
+						.replaceAll("%X\\{applicationId\\}", this.applicationId));
 				connectionFactory = new CachingConnectionFactory();
 				connectionFactory.setHost(host);
 				connectionFactory.setPort(port);
@@ -527,12 +528,6 @@ public class AmqpAppender extends AppenderSkeleton {
 						amqpProps.setMessageId(UUID.randomUUID().toString());
 					}
 
-					// Set applicationId, if we're using one
-					if (null != applicationId) {
-						amqpProps.setAppId(applicationId);
-						MDC.put(APPLICATION_ID, applicationId);
-					}
-
 					// Set timestamp
 					Calendar tstamp = Calendar.getInstance();
 					tstamp.setTimeInMillis(logEvent.getTimeStamp());
@@ -596,11 +591,6 @@ public class AmqpAppender extends AppenderSkeleton {
 						else {
 							errorHandler.error("Could not send log message " + logEvent.getRenderedMessage()
 									+ " after " + maxSenderRetries + " retries", e, ErrorCode.WRITE_FAILURE, logEvent);
-						}
-					}
-					finally {
-						if (null != applicationId) {
-							MDC.remove(APPLICATION_ID);
 						}
 					}
 				}
