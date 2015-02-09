@@ -392,9 +392,6 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 		this.connectionFactory.setVirtualHost(this.virtualHost);
 		maybeDeclareExchange();
 		this.senderPool = Executors.newCachedThreadPool();
-		synchronized(this) {
-			// (logically) flush all variables to main memory
-		}//NOSONAR
 		for (int i = 0; i < this.senderPoolSize; i++) {
 			this.senderPool.submit(new EventSender());
 		}
@@ -461,12 +458,6 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 	 */
 	protected class EventSender implements Runnable {
 
-		public EventSender() {
-			synchronized(AmqpAppender.this) {
-				// (logically) invalidate the CPU cache so we see all outer class fields correctly
-			}//NOSONAR
-		}
-
 		@Override
 		public void run() {
 			try {
@@ -510,7 +501,7 @@ public class AmqpAppender extends AppenderBase<ILoggingEvent> {
 					String msgBody;
 					String routingKey = routingKeyLayout.doLayout(logEvent);
 					// Set applicationId, if we're using one
-					if (null != applicationId) {
+					if (applicationId != null) {
 						amqpProps.setAppId(applicationId);
 					}
 

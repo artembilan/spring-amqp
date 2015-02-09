@@ -151,11 +151,6 @@ public class AmqpAppender extends AppenderSkeleton {
 	private final Object layoutMutex = new Object();
 
 	/**
-	 * Whether or not we've tried to declare this exchange yet.
-	 */
-	private final AtomicBoolean exchangeDeclared = new AtomicBoolean(false);
-
-	/**
 	 * Configuration arbitrary application ID.
 	 */
 	private String applicationId = null;
@@ -402,17 +397,18 @@ public class AmqpAppender extends AppenderSkeleton {
 		this.charset = charset;
 	}
 
-	/**
-	 * Submit the required number of senders into the pool.
-	 */
-	protected void startSenders() {
-		senderPool = Executors.newCachedThreadPool();
-		synchronized(this) {
-			// (logically) flush all variables to main memory
-		}//NOSONAR
-		for (int i = 0; i < senderPoolSize; i++) {
-			senderPool.submit(new EventSender());
-		}
+	@Override
+	public void activateOptions() {
+		this.routingKeyLayout = new PatternLayout(this.routingKeyPattern
+				.replaceAll("%X\\{applicationId\\}", this.applicationId));
+		this.connectionFactory = new CachingConnectionFactory();
+		this.connectionFactory.setHost(host);
+		this.connectionFactory.setPort(port);
+		this.connectionFactory.setUsername(username);
+		this.connectionFactory.setPassword(password);
+		this.connectionFactory.setVirtualHost(virtualHost);
+		maybeDeclareExchange();
+		startSenders();
 	}
 
 	/**
@@ -442,28 +438,19 @@ public class AmqpAppender extends AppenderSkeleton {
 		}
 	}
 
+	/**
+	 * Submit the required number of senders into the pool.
+	 */
+	protected void startSenders() {
+		this.senderPool = Executors.newCachedThreadPool();
+		for (int i = 0; i < senderPoolSize; i++) {
+			senderPool.submit(new EventSender());
+		}
+	}
+
 	@Override
 	public void append(LoggingEvent event) {
-		if (null == senderPool && this.initializing.compareAndSet(false, true)) {
-			try {
-				this.routingKeyLayout = new PatternLayout(this.routingKeyPattern
-						.replaceAll("%X\\{applicationId\\}", this.applicationId));
-				connectionFactory = new CachingConnectionFactory();
-				connectionFactory.setHost(host);
-				connectionFactory.setPort(port);
-				connectionFactory.setUsername(username);
-				connectionFactory.setPassword(password);
-				connectionFactory.setVirtualHost(virtualHost);
-				maybeDeclareExchange();
-				exchangeDeclared.set(true);
-
-				startSenders();
-			}
-			finally {
-				this.initializing.set(false);
-			}
-		}
-		events.add(new Event(event, event.getProperties()));
+		this.events.add(new Event(event, event.getProperties()));
 	}
 
 	@Override
