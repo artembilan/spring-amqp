@@ -73,6 +73,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * the queue, exchange and binding will be automatically declared.
  *
  * @author Stephane Nicoll
+ * @author Gary Russell
  * @since 1.4
  * @see EnableRabbit
  * @see RabbitListenerAnnotationBeanPostProcessor
@@ -140,6 +141,7 @@ public @interface RabbitListener {
 	 * Array of {@link QueueBinding}s providing the listener's queue names, together
 	 * with the exchange and optional binding information.
 	 * @return the bindings.
+	 * @since 1.5
 	 */
 	QueueBinding[] bindings() default {};
 

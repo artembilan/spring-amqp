@@ -160,11 +160,10 @@ public class EnableRabbitIntegrationTests {
 
 	public static class MyService {
 
-		@RabbitListener(bindings = {
-				@QueueBinding(
-					value = @Queue(value = "auto.declare", autoDelete = "true"),
-					exchange = @Exchange(value = "auto.exch", autoDelete = "true"),
-					key = "auto.rk")}
+		@RabbitListener(bindings = @QueueBinding(
+				value = @Queue(value = "auto.declare", autoDelete = "true"),
+				exchange = @Exchange(value = "auto.exch", autoDelete = "true"),
+				key = "auto.rk")
 		)
 		public String handleWithDeclare(String foo) {
 			return foo.toUpperCase();

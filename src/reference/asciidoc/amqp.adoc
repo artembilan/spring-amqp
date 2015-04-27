@@ -1033,21 +1033,19 @@ Starting with _version 1.5_, the queue can be declared and bound automatically, 
 @Component
 public class MyService {
 
-  @RabbitListener(bindings = {
-      @QueueBinding(
+  @RabbitListener(bindings = @QueueBinding(
         value = @Queue(value = "myQueue", durable = "true"),
         exchange = @Exchange(value = "auto.exch"),
-        key = "orderRoutingKey")}
+        key = "orderRoutingKey")
   )
   public void processOrder(String data) {
     ...
   }
 
-  @RabbitListener(bindings = {
-      @QueueBinding(
+  @RabbitListener(bindings = @QueueBinding(
         value = @Queue(),
         exchange = @Exchange(value = "auto.exch"),
-        key = "invoiceRoutingKey")}
+        key = "invoiceRoutingKey")
   )
   public void processInvoice(String data) {
     ...
