@@ -1011,6 +1011,10 @@
 	using the 'reply-queue' name as the routing key; an address with the form
 	'exchange/routingKey' means that replies will be published to the specified exchange
 	and routed using the specified routing key.
+	The 'reply-address' value has precedence over 'reply-queue' value.
+	The '<reply-listener>' must be configured as separate '<listener-container>' component, when only
+	'reply-address' is in use.
+	The 'reply-address' and 'reply-queue' must refer to the same queue logically for proper reply routing logic.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">

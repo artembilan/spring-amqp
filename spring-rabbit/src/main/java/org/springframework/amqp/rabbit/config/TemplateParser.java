@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.Conventions;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -105,7 +106,8 @@ class TemplateParser extends AbstractSingleBeanDefinitionParser {
 		NamespaceUtils.setReferenceIfAttributeDefined(builder, element, MESSAGE_CONVERTER_ATTRIBUTE);
 		String replyAddress = element.getAttribute(REPLY_ADDRESS_ATTRIBUTE);
 		if (!StringUtils.hasText(replyAddress)) {
-			NamespaceUtils.setReferenceIfAttributeDefined(builder, element, REPLY_QUEUE_ATTRIBUTE);
+			NamespaceUtils.setReferenceIfAttributeDefined(builder, element, REPLY_QUEUE_ATTRIBUTE,
+					Conventions.attributeNameToPropertyName(REPLY_ADDRESS_ATTRIBUTE));
 		}
 		NamespaceUtils.setValueIfAttributeDefined(builder, element, REPLY_ADDRESS_ATTRIBUTE);
 		NamespaceUtils.setReferenceIfAttributeDefined(builder, element, RETURN_CALLBACK_ATTRIBUTE);
@@ -176,7 +178,10 @@ class TemplateParser extends AbstractSingleBeanDefinitionParser {
 					"connectionFactory",
 					new RuntimeBeanReference(element.getAttribute(CONNECTION_FACTORY_ATTRIBUTE)));
 		}
-		replyContainer.getPropertyValues().add("queues", new RuntimeBeanReference(element.getAttribute(REPLY_QUEUE_ATTRIBUTE)));
+		if (element.hasAttribute(REPLY_QUEUE_ATTRIBUTE)) {
+			replyContainer.getPropertyValues().add("queues",
+					new RuntimeBeanReference(element.getAttribute(REPLY_QUEUE_ATTRIBUTE)));
+		}
 		return replyContainer;
 	}
 

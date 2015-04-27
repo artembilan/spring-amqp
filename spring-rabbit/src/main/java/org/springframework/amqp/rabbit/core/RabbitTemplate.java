@@ -271,7 +271,7 @@ public class RabbitTemplate extends RabbitAccessor
 	 * <p>The address can be a simple queue name (in which case the reply will be routed via the default
 	 * exchange), or with the form {@code exchange/routingKey} to route the reply using an explicit
 	 * exchange and routing key.
-	 * @param replyQueue the replyQueue to set
+	 * @param replyAddress the replyAddress to set
 	 */
 	public void setReplyAddress(String replyAddress) {
 		this.replyAddress = replyAddress;
