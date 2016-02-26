@@ -1675,6 +1675,11 @@ Threads from the `TaskExecutor` configured in the `SimpleMessageListener` are us
 If not configured, a `SimpleAsyncTaskExecutor` is used.
 If a pooled executor is used, ensure the pool size is sufficient to handle the configured concurrency.
 
+NOTE: The listener container `beanName` is used as a `threadNamePrefix` for default `SimpleAsyncTaskExecutor`.
+It is useful for logs analysis.
+The provided `TaskExecutor` is used as is, without modification.
+The custom `threadNamePrefix` for better logging should be supplied on that `TaskExecutor` bean definition.
+
 The `Executor` configured in the `CachingConnectionFactory` is passed into the `RabbitMQ Client` when creating the connection, and its threads are used to deliver new messages to the listener container.
 At the time of writing, if this is not configured, the client uses an internal thread pool executor with a pool size of 5.
 
