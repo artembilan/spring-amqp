@@ -28,8 +28,10 @@ import com.rabbitmq.client.impl.recovery.AutorecoveringConnection;
 
 /**
  * Simply a Connection.
+ *
  * @author Dave Syer
  * @author Gary Russell
+ *
  * @since 1.0
  *
  */
@@ -79,12 +81,13 @@ public class SimpleConnection implements Connection, NetworkConnection {
 	 * @return true if the connection is open
 	 * @throws AutoRecoverConnectionNotCurrentlyOpenException if the connection is an
 	 * {@link AutorecoveringConnection} and is currently closed; this is required to
-	 * prevent the CCF from discarding this connection and opening a new one, in which
-	 * case the "old" connection would eventually be recovered and orphaned - also any
-	 * consumers belonging to it might be recovered too and the broker will deliver
-	 * messages to them when there is no code actually running to deal with those messages
-	 * (when using the SMLC). If we have actually closed the connection (e.g. via
-	 * {@link CachingConnectionFactory#resetConnection()}) this will return false.
+	 * prevent the {@link CachingConnectionFactory} from discarding this connection
+	 * and opening a new one, in which case the "old" connection would eventually be recovered
+	 * and orphaned - also any consumers belonging to it might be recovered too
+	 * and the broker will deliver messages to them when there is no code actually running
+	 * to deal with those messages (when using the {@code SimpleMessageListenerContainer}).
+	 * If we have actually closed the connection
+	 * (e.g. via {@link CachingConnectionFactory#resetConnection()}) this will return false.
 	 */
 	@Override
 	public boolean isOpen() {
@@ -113,18 +116,12 @@ public class SimpleConnection implements Connection, NetworkConnection {
 
 	@Override
 	public InetAddress getAddress() {
-		if (this.delegate instanceof NetworkConnection) {
-			return ((NetworkConnection) this.delegate).getAddress();
-		}
-		return null;
+		return this.delegate.getAddress();
 	}
 
 	@Override
 	public int getPort() {
-		if (this.delegate instanceof NetworkConnection) {
-			return ((NetworkConnection) this.delegate).getPort();
-		}
-		return 0;
+		return this.delegate.getPort();
 	}
 
 	@Override

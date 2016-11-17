@@ -406,7 +406,7 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 	 * @param mandatory the mandatory to set.
 	 */
 	public void setMandatory(boolean mandatory) {
-		this.mandatoryExpression = new ValueExpression<Boolean>(mandatory);
+		this.mandatoryExpression = new ValueExpression<>(mandatory);
 	}
 
 	/**
@@ -632,7 +632,7 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 	 * not been received or null if no such confirms exist.
 	 */
 	public Collection<CorrelationData> getUnconfirmed(long age) {
-		Set<CorrelationData> unconfirmed = new HashSet<CorrelationData>();
+		Set<CorrelationData> unconfirmed = new HashSet<>();
 		synchronized (this.publisherConfirmChannels) {
 			long cutoffTime = System.currentTimeMillis() - age;
 			for (Channel channel : this.publisherConfirmChannels.keySet()) {
@@ -771,7 +771,8 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 		convertAndSend(this.exchange, routingKey, object, (CorrelationData) null);
 	}
 
-	public void convertAndSend(String routingKey, final Object object, CorrelationData correlationData) throws AmqpException {
+	public void convertAndSend(String routingKey, final Object object, CorrelationData correlationData)
+			throws AmqpException {
 		convertAndSend(this.exchange, routingKey, object, correlationData);
 	}
 
@@ -780,7 +781,8 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 		convertAndSend(exchange, routingKey, object, (CorrelationData) null);
 	}
 
-	public void convertAndSend(String exchange, String routingKey, final Object object, CorrelationData correlationData) throws AmqpException {
+	public void convertAndSend(String exchange, String routingKey, final Object object, CorrelationData correlationData)
+			throws AmqpException {
 		send(exchange, routingKey, convertMessageIfNecessary(object), correlationData);
 	}
 
