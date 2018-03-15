@@ -56,6 +56,7 @@ import com.rabbitmq.client.Channel;
  * @author Artem Bilan
  *
  * @since 1.4
+ *
  * @see MessageListener
  * @see ChannelAwareMessageListener
  */

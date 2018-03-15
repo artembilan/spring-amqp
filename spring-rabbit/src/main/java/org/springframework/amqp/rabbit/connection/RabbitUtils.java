@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,13 @@ import com.rabbitmq.client.impl.recovery.AutorecoveringChannel;
  * @author Mark Fisher
  * @author Mark Pollack
  * @author Gary Russell
+ * @author Artem Bilan
  */
 public abstract class RabbitUtils {
 
-	public static final int DEFAULT_PORT = AMQP.PROTOCOL.PORT;
-
 	private static final Log logger = LogFactory.getLog(RabbitUtils.class);
 
-	private static final ThreadLocal<Boolean> physicalCloseRequired = new ThreadLocal<Boolean>();
+	private static final ThreadLocal<Boolean> physicalCloseRequired = new ThreadLocal<>();
 
 	/**
 	 * Close the given RabbitMQ Connection and ignore any thrown exception. This is useful for typical
@@ -159,7 +158,6 @@ public abstract class RabbitUtils {
 
 	/**
 	 * Declare to that broker that a channel is going to be used transactionally, and convert exceptions that arise.
-	 *
 	 * @param channel the channel to use
 	 */
 	public static void declareTransactional(Channel channel) {
@@ -344,7 +342,6 @@ public abstract class RabbitUtils {
 			logger.debug("Rejecting messages (requeue=" + shouldRequeue + ")");
 		}
 		return shouldRequeue;
-
 	}
 
 }

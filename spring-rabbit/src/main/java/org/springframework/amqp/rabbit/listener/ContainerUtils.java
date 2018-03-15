@@ -24,6 +24,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
  * Utility methods for listener containers.
  *
  * @author Gary Russell
+ *
  * @since 2.1
  *
  */

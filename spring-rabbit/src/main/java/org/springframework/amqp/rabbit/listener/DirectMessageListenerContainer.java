@@ -526,6 +526,7 @@ public class DirectMessageListenerContainer extends AbstractMessageListenerConta
 					Constructor<AmqpAdmin> ctor = (Constructor<AmqpAdmin>) clazz
 							.getConstructor(ConnectionFactory.class);
 					checkAdmin = ctor.newInstance(getConnectionFactory());
+					setRabbitAdmin(checkAdmin);
 				}
 				catch (Exception e) {
 					this.logger.error("Failed to create a RabbitAdmin", e);

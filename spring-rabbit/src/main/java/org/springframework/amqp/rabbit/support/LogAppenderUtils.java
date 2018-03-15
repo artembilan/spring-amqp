@@ -72,14 +72,4 @@ public final class LogAppenderUtils {
 		}
 	}
 
-	/* Tested as follows:
-		@Test
-		public void foo() {
-			AbstractConnectionFactory cf = mock(AbstractConnectionFactory.class);
-			given(cf.getRabbitConnectionFactory()).willReturn(mock(com.rabbitmq.client.ConnectionFactory.class));
-			LogAppenderUtils.updateClientConnectionProperties(cf, "foo:bar");
-			verify(cf).getRabbitConnectionFactory();
-		}
-	 */
-
 }
