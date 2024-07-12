@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2023 the original author or authors.
+ * Copyright 2006-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,6 +145,7 @@ public final class SerializationUtils {
 	 * Verify that the class is in the allowed list.
 	 * @param clazz the class.
 	 * @param patterns the patterns.
+	 * @throws SecurityException if class to deserialized is not allowed
 	 * @since 2.1
 	 */
 	public static void checkAllowedList(Class<?> clazz, Set<String> patterns) {

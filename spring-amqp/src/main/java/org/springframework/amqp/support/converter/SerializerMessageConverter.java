@@ -19,8 +19,8 @@ package org.springframework.amqp.support.converter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
@@ -160,18 +160,16 @@ public class SerializerMessageConverter extends AllowedListDeserializingMessageC
 	}
 
 	private Object deserialize(ByteArrayInputStream inputStream) throws IOException {
-		try (ObjectInputStream objectInputStream = new ConfigurableObjectInputStream(inputStream,
-				this.defaultDeserializerClassLoader) {
+		ObjectInputStream objectInputStream =
+				new ConfigurableObjectInputStream(inputStream, this.defaultDeserializerClassLoader);
+		objectInputStream.setObjectInputFilter(
+				ObjectInputFilter.allowFilter(aClass -> {
+							checkAllowedList(aClass);
+							return true;
+						},
+						ObjectInputFilter.Status.REJECTED));
 
-			@Override
-			protected Class<?> resolveClass(ObjectStreamClass classDesc)
-					throws IOException, ClassNotFoundException {
-				Class<?> clazz = super.resolveClass(classDesc);
-				checkAllowedList(clazz);
-				return clazz;
-			}
-
-		}) {
+		try (objectInputStream) {
 			return objectInputStream.readObject();
 		}
 		catch (ClassNotFoundException ex) {

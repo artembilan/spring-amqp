@@ -19,8 +19,8 @@ package org.springframework.amqp.support.converter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
@@ -152,16 +152,14 @@ public class SimpleMessageConverter extends AllowedListDeserializingMessageConve
 	 * @throws IOException if creation of the ObjectInputStream failed
 	 */
 	protected ObjectInputStream createObjectInputStream(InputStream is) throws IOException {
-		return new ConfigurableObjectInputStream(is, this.classLoader) {
-
-			@Override
-			protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
-				Class<?> clazz = super.resolveClass(classDesc);
-				checkAllowedList(clazz);
-				return clazz;
-			}
-
-		};
+		ObjectInputStream objectInputStream = new ConfigurableObjectInputStream(is, this.classLoader);
+		objectInputStream.setObjectInputFilter(
+				ObjectInputFilter.allowFilter(aClass -> {
+							checkAllowedList(aClass);
+							return true;
+						},
+						ObjectInputFilter.Status.REJECTED));
+		return objectInputStream;
 	}
 
 }

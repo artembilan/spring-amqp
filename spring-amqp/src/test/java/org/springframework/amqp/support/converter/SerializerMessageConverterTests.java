@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -74,6 +75,7 @@ public class SerializerMessageConverterTests extends AllowedListDeserializingMes
 	@Test
 	public void messageToSerializedObject() throws Exception {
 		SerializerMessageConverter converter = new SerializerMessageConverter();
+		converter.setAllowedListPatterns(List.of("*"));
 		MessageProperties properties = new MessageProperties();
 		properties.setContentType(MessageProperties.CONTENT_TYPE_SERIALIZED_OBJECT);
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -92,6 +94,7 @@ public class SerializerMessageConverterTests extends AllowedListDeserializingMes
 	@Test
 	public void messageToSerializedObjectNoContentType() throws Exception {
 		SerializerMessageConverter converter = new SerializerMessageConverter();
+		converter.setAllowedListPatterns(List.of(TestBean.class.getName()));
 		converter.setIgnoreContentType(true);
 		MessageProperties properties = new MessageProperties();
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();

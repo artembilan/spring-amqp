@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -33,27 +35,28 @@ import org.springframework.amqp.core.MessageProperties;
 /**
  * @author Mark Fisher
  * @author Gary Russell
+ * @author Artem Bilan
  */
 public class SimpleMessageConverterTests extends AllowedListDeserializingMessageConverterTests {
 
 	@Test
-	public void bytesAsDefaultMessageBodyType() throws Exception {
+	public void bytesAsDefaultMessageBodyType() {
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message message = new Message("test".getBytes(), new MessageProperties());
 		Object result = converter.fromMessage(message);
 		assertThat(result.getClass()).isEqualTo(byte[].class);
-		assertThat(new String((byte[]) result, "UTF-8")).isEqualTo("test");
+		assertThat(new String((byte[]) result, StandardCharsets.UTF_8)).isEqualTo("test");
 	}
 
 	@Test
-	public void noMessageIdByDefault() throws Exception {
+	public void noMessageIdByDefault() {
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message message = converter.toMessage("foo", null);
 		assertThat(message.getMessageProperties().getMessageId()).isNull();
 	}
 
 	@Test
-	public void optionalMessageId() throws Exception {
+	public void optionalMessageId() {
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		converter.setCreateMessageIds(true);
 		Message message = converter.toMessage("foo", null);
@@ -87,6 +90,7 @@ public class SimpleMessageConverterTests extends AllowedListDeserializingMessage
 	@Test
 	public void messageToSerializedObject() throws Exception {
 		SimpleMessageConverter converter = new SimpleMessageConverter();
+		converter.setAllowedListPatterns(List.of("*"));
 		MessageProperties properties = new MessageProperties();
 		properties.setContentType(MessageProperties.CONTENT_TYPE_SERIALIZED_OBJECT);
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -114,7 +118,7 @@ public class SimpleMessageConverterTests extends AllowedListDeserializingMessage
 	}
 
 	@Test
-	public void bytesToMessage() throws Exception {
+	public void bytesToMessage() {
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message message = converter.toMessage(new byte[] { 1, 2, 3 }, new MessageProperties());
 		String contentType = message.getMessageProperties().getContentType();
@@ -140,7 +144,7 @@ public class SimpleMessageConverterTests extends AllowedListDeserializingMessage
 	}
 
 	@Test
-	public void messageConversionExceptionForClassNotFound() throws Exception {
+	public void messageConversionExceptionForClassNotFound() {
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		TestBean testBean = new TestBean("foo");
 		Message message = converter.toMessage(testBean, new MessageProperties());
@@ -163,7 +167,8 @@ public class SimpleMessageConverterTests extends AllowedListDeserializingMessage
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).contains("SimpleMessageConverter only supports String, byte[] and Serializable payloads, received:");
+			assertThat(e.getMessage())
+					.contains("SimpleMessageConverter only supports String, byte[] and Serializable payloads, received:");
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,22 +30,29 @@ import org.springframework.util.Assert;
 
 /**
  * @author Gary Russell
+ * @author Artem Bilan
  * @since 1.5.5
  *
  */
 public class AllowedListDeserializingMessageConverterTests {
 
 	@Test
-	public void testAllowedList() throws Exception {
+	public void testAllowedList() {
 		SerializerMessageConverter converter = new SerializerMessageConverter();
 		TestBean testBean = new TestBean("foo");
 		Message message = converter.toMessage(testBean, new MessageProperties());
-		// when env var not set
-//		assertThatExceptionOfType(SecurityException.class).isThrownBy(() -> converter.fromMessage(message));
 		Object fromMessage;
-		// when env var set.
-		fromMessage = converter.fromMessage(message);
-		assertThat(fromMessage).isEqualTo(testBean);
+		// See build.gradle `tasks.withType(Test).all`
+		if ("true".equals(System.getenv("SPRING_AMQP_DESERIALIZATION_TRUST_ALL"))) {
+			fromMessage = converter.fromMessage(message);
+			assertThat(fromMessage).isEqualTo(testBean);
+		}
+		else {
+			assertThatExceptionOfType(MessageConversionException.class)
+					.isThrownBy(() -> converter.fromMessage(message))
+					.withRootCauseInstanceOf(SecurityException.class)
+					.withStackTraceContaining("Attempt to deserialize unauthorized");
+		}
 
 		converter.setAllowedListPatterns(Collections.singletonList("*"));
 		fromMessage = converter.fromMessage(message);
@@ -59,7 +66,10 @@ public class AllowedListDeserializingMessageConverterTests {
 		assertThat(fromMessage).isEqualTo(testBean);
 
 		converter.setAllowedListPatterns(Collections.singletonList("foo.*"));
-		assertThatExceptionOfType(SecurityException.class).isThrownBy(() -> converter.fromMessage(message));
+		assertThatExceptionOfType(MessageConversionException.class)
+				.isThrownBy(() -> converter.fromMessage(message))
+				.withRootCauseInstanceOf(SecurityException.class)
+				.withStackTraceContaining("Attempt to deserialize unauthorized");
 	}
 
 	@SuppressWarnings("serial")
